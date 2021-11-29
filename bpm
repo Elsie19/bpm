@@ -1,0 +1,35 @@
+#!/bin/bash
+set -e
+
+case "${1}" in
+	add)
+		if test -f manifest; then
+			if ! git ls-remote "https://github.com/$(cut -d@ -f1 <<< $2)" -q; then
+				echo "remote not found"
+				exit 1
+			else
+				echo "${2}@$(git ls-remote https://github.com/$(cut -d@ -f1 <<< $2).git | awk '{print $1;}' | head -n 1)"
+			fi
+		else
+			echo "No manifest found"
+		fi
+	;;
+	generate)
+		if ! source ./manifest; then
+			echo "Failed to read manifest"
+			exit 1
+		fi
+		if test -f bpm.lock; then
+			echo "Removing stale bpm.lock"
+			rm -f bpm.lock
+		fi
+		for i in "${dependencies[@]}"; do
+			echo "Adding: $i"
+			echo "${i}@$(git ls-remote https://github.com/$i.git | awk '{print $1;}' | head -n 1)" >> bpm.lock
+		done
+		exit
+	;;
+	*)
+		exit 1
+	;;
+esac
