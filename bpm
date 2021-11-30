@@ -46,9 +46,11 @@ case "${1}" in
 				echo -e "${red}==> $(cut -d@ -f1 <<< $i)@$local_version != $(cut -d@ -f1 <<< $i)@$latest_tag${normal}"
 			fi
 		done
-		echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"
-		echo -e "\t${check[*]}\n"
-		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}', followed '${bold}bpm pull${normal}"
+		if [[ "${#checks[@]}" -ne 0 ]]; then
+			echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"
+			echo -e "\t${check[*]}\n"
+		fi
+		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}', followed by '${bold}bpm pull${normal}"
 		echo -e "\ndependencies=("
 		for i in "${upgrading[@]}"; do
 			echo -e "\t$i"
