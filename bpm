@@ -67,9 +67,13 @@ case "${1}" in
 				echo "Overwriting old directory"
 				rm -rf "$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
 			fi
-			git clone https://github.com/$(cut -d@ -f1 <<< $line) $(cut -d@ -f1 <<< $line | cut -d'/' -f2)
+			git clone --filter=blob:none https://github.com/"$(cut -d@ -f1 <<< $line)" $(cut -d@ -f1 <<< $line | cut -d'/' -f2)
 			cd "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)"
 			git checkout -q "$(cut -d@ -f2 <<< $line)"
+			if test -f "bpm.sh"; then
+				echo "Running post-clone script"
+				./bpm.sh
+			fi
 		done
 	;;
 	*)
