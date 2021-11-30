@@ -11,7 +11,7 @@ git clone --depth=1 https://github.com/ajdiaz/bashc
 cd bashc
 make -j$(nproc)
 chmod +x releases/bashc
-sudo install -dm755 releases/bashc /usr/bin/bashc
+sudo mv releases/bashc /usr/bin/bashc
 cd ..
 rm -rf bashc
 
