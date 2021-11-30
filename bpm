@@ -107,6 +107,16 @@ case "${1}" in
 		fi
 		mkdir -pv build/binary
 		echo '#!/bin/bash' > build/"$bpm_name"
+		for line in $(cat bpm.lock); do
+			if [[ ${#dependencies[@]} -ne 0 ]]; then
+				for i in "${dependencies[@]}"; do
+					if [[ -d $HOME/.local/state/bpm/"$bpm_name"/$(cut -d@ -f1 <<< $line)/src/libs ]]; then
+						cat $HOME/.local/state/bpm/"$bpm_name"/$(cut -d@ -f1 <<< $line)/src/libs/* >> build/"$bpm_name"
+					fi
+					cat $HOME/.local/state/bpm/"$bpm_name"/$(cut -d@ -f1 <<< $line)/src/main.sh >> build/"$bpm_name"
+				done
+			fi
+		done
 		if [[ -d src/libs ]]; then
 			cat src/libs/* >> build/"$bpm_name"
 		fi
