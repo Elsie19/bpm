@@ -88,7 +88,7 @@ case "${1}" in
 		export BPM_PWD="$(pwd)"
 		export BPM_LIB_DIR="${BPM_PWD}/src/libs/"
 		export BPM_SRC="${BPM_PWD}/src/"
-		bash "${BPM_SRC}/main.sh"
+		bash "${BPM_SRC}main.sh"
 		unset BPM_PWD BPM_LIB_DIR BPM_SRC
 		exit
 	;;
@@ -121,7 +121,7 @@ case "${1}" in
 			cat src/libs/* >> build/"$bpm_name"
 		fi
 		cat src/main.sh >> build/"$bpm_name"
-		bashc build/"$bpm_name" build/binary/"$bpm_name"
+		/usr/bin/bashc build/"$bpm_name" build/binary/"$bpm_name"
 	;;
 	*)
 		exit 1
