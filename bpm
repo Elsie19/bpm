@@ -79,6 +79,18 @@ case "${1}" in
 			fi
 		done
 	;;
+	run)
+		if ! source ./manifest; then
+			echo -e "${red}Failed to read manifest${normal}"
+			exit 1
+		fi
+		run="${main_file:-main.sh}"
+		export BPM_PWD="$(pwd)"
+		export BPM_LIB_DIR="${BPM_PWD}/src/lib"
+		export BPM_SRC="${BPM_PWD}/src"
+		bash "${BPM_SRC}/${run}"
+		unset BPM_PWD BPM_LIB_DIR BPM_SRC
+		exit
 	*)
 		exit 1
 	;;
