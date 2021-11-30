@@ -61,6 +61,7 @@ case "${1}" in
 	pull)
 		if ! source ./manifest; then
 			echo -e "${red}Failed to read manifest${normal}"
+			exit 1
 		fi
 		for line in $(cat bpm.lock); do
 			mkdir -p $HOME/.local/state/bpm/$bpm_name/"$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
