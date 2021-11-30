@@ -1,3 +1,4 @@
 dependencies=(
-	"Henryws/dino"
+	"fsaintjacques/semver-tool@3.1.0"
+	"gravitational/teleport@6.2.18"
 )

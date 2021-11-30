@@ -1,22 +1,17 @@
 #!/bin/bash
 set -e
 
+# shellcheck disable=SC2155
+export bold=$(tput bold)
+# shellcheck disable=SC2155
+export normal=$(tput sgr0)
+# shellcheck disable=SC2155
+export red=$(tput setaf 1)
+
 case "${1}" in
-	add)
-		if test -f manifest; then
-			if ! git ls-remote "https://github.com/$(cut -d@ -f1 <<< $2)" -q; then
-				echo "remote not found"
-				exit 1
-			else
-				echo "${2}@$(git ls-remote https://github.com/$(cut -d@ -f1 <<< $2).git | awk '{print $1;}' | head -n 1)"
-			fi
-		else
-			echo "No manifest found"
-		fi
-	;;
 	generate)
 		if ! source ./manifest; then
-			echo "Failed to read manifest"
+			echo -e "${red}Failed to read manifest${normal}"
 			exit 1
 		fi
 		if test -f bpm.lock; then
@@ -27,6 +22,38 @@ case "${1}" in
 			echo "Adding: $i"
 			echo "${i}@$(git ls-remote https://github.com/$i.git | awk '{print $1;}' | head -n 1)" >> bpm.lock
 		done
+		exit
+	;;
+	update)
+		if ! source ./manifest; then
+			echo -e "${red}Failed to read manifest${normal}"
+			exit 1
+		fi
+		if [[ ${#dependencies[@]} -eq 0 ]]; then
+			echo "${red}Empty dependencies list${normal}"
+			exit 1
+		fi
+		for i in "${dependencies[@]}"; do
+			local_version="$(cut -d@ -f2 <<< $i)"
+			latest_tag="$(git ls-remote --tags https://github.com/$(cut -d@ -f1 <<< $i) | awk '{ print $2 }' | cut -d"/" -f3 | sort | tail -n 1)"
+			# check if major update is possible
+			if ! semver diff "$local_version" "$latest_tag" | grep -q 'major'; then
+				upgrading+=("$(cut -d@ -f1 <<< $i)@$latest_tag")
+				echo "==> $(cut -d@ -f1 <<< $i)@$local_version -> $(cut -d@ -f1 <<< $i)@$latest_tag"
+			else
+				upgrading+=("$(cut -d@ -f1 <<< $i)@$local_version")
+				check+=("$(cut -d@ -f1 <<< $i)@$local_version")
+				echo -e "${red}==> $(cut -d@ -f1 <<< $i)@$local_version != $(cut -d@ -f1 <<< $i)@$latest_tag${normal}"
+			fi
+		done
+		echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"
+		echo -e "\t${check[@]}\n"
+		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}'"
+		echo -e "\ndependencies=("
+		for i in "${upgrading[@]}"; do
+			echo -e "\t$i"
+		done
+		echo ")"
 		exit
 	;;
 	*)
