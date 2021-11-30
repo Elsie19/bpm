@@ -20,7 +20,7 @@ case "${1}" in
 		fi
 		for i in "${dependencies[@]}"; do
 			echo "Adding: $i"
-			echo "${i}@$(git ls-remote https://github.com/$i.git | awk '{print $1;}' | head -n 1)" >> bpm.lock
+			echo "$(cut -d@ -f1 <<< $i)@$(git ls-remote https://github.com/$(cut -d@ -f1 <<<$i).git | awk '{print $1;}' | head -n 1)" >> bpm.lock
 		done
 		exit
 	;;
@@ -47,14 +47,30 @@ case "${1}" in
 			fi
 		done
 		echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"
-		echo -e "\t${check[@]}\n"
-		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}'"
+		echo -e "\t${check[*]}\n"
+		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}', followed '${bold}bpm pull${normal}"
 		echo -e "\ndependencies=("
 		for i in "${upgrading[@]}"; do
 			echo -e "\t$i"
 		done
 		echo ")"
 		exit
+	;;
+	pull)
+		if ! source ./manifest; then
+			echo -e "${red}Failed to read manifest${normal}"
+		fi
+		for line in $(cat bpm.lock); do
+			mkdir -p $HOME/.local/state/bpm/$bpm_name/"$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
+			cd $HOME/.local/state/bpm/$bpm_name/"$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
+			if [[ -d "$(cut -d@ -f1 <<< $line | cut -d'/' -f1)" ]]; then
+				echo "Overwriting old directory"
+				rm -rf "$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
+			fi
+			git clone https://github.com/$(cut -d@ -f1 <<< $line) $(cut -d@ -f1 <<< $line | cut -d'/' -f2)
+			cd "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)"
+			git checkout -q "$(cut -d@ -f2 <<< $line)"
+		done
 	;;
 	*)
 		exit 1
