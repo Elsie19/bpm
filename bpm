@@ -86,8 +86,8 @@ case "${1}" in
 			exit 1
 		fi
 		export BPM_PWD="$(pwd)"
-		export BPM_LIB_DIR="${BPM_PWD}/src/lib"
-		export BPM_SRC="${BPM_PWD}/src"
+		export BPM_LIB_DIR="${BPM_PWD}/src/libs/"
+		export BPM_SRC="${BPM_PWD}/src/"
 		bash "${BPM_SRC}/main.sh"
 		unset BPM_PWD BPM_LIB_DIR BPM_SRC
 		exit
