@@ -63,11 +63,11 @@ case "${1}" in
 		for line in $(cat bpm.lock); do
 			mkdir -p $HOME/.local/state/bpm/$bpm_name/"$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
 			cd $HOME/.local/state/bpm/$bpm_name/"$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
-			if [[ -d "$(cut -d@ -f1 <<< $line | cut -d'/' -f1)" ]]; then
+			if [[ -d "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)" ]]; then
 				echo "Overwriting old directory"
-				rm -rf "$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
+				rm -rf "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)"
 			fi
-			git clone --filter=blob:none https://github.com/"$(cut -d@ -f1 <<< $line)" $(cut -d@ -f1 <<< $line | cut -d'/' -f2)
+			git clone --filter=blob:none -j 20 -q https://github.com/"$(cut -d@ -f1 <<< $line)" $(cut -d@ -f1 <<< $line | cut -d'/' -f2)
 			cd "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)"
 			git checkout -q "$(cut -d@ -f2 <<< $line)"
 			if test -f "bpm.sh"; then
