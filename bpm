@@ -97,6 +97,22 @@ case "${1}" in
 		source **/src/main.sh
 		exit
 	;;
+	compile)
+		if ! command -v bashc; then
+			echo -e "${bold}bashc${normal} not found!"
+		fi
+		if ! source ./manifest; then
+			echo -e "${red}Failed to read manifest${normal}"
+			exit 1
+		fi
+		mkdir -pv build/binary
+		echo '#!/bin/bash' > build/"$bpm_name"
+		if [[ -d src/libs ]]; then
+			cat src/libs/* >> build/"$bpm_name"
+		fi
+		cat src/main.sh >> build/"$bpm_name"
+		bashc build/"$bpm_name" build/binary/"$bpm_name"
+	;;
 	*)
 		exit 1
 	;;
