@@ -123,6 +123,14 @@ case "${1}" in
 		cat src/main.sh >> build/"$bpm_name"
 		/usr/bin/bashc build/"$bpm_name" build/binary/"$bpm_name"
 	;;
+	new)
+		mkdir -p "$2"
+		cd "$2"
+		mkdir -p src
+		echo '# Replace contents. Do not include shebang' > src/main.sh
+		chmod +x src/main.sh
+		exit
+	;;
 	*)
 		exit 1
 	;;
