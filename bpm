@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+shopt -s globstar
 
 # shellcheck disable=SC2155
 export bold=$(tput bold)
@@ -84,13 +85,18 @@ case "${1}" in
 			echo -e "${red}Failed to read manifest${normal}"
 			exit 1
 		fi
-		run="${main_file:-main.sh}"
 		export BPM_PWD="$(pwd)"
 		export BPM_LIB_DIR="${BPM_PWD}/src/lib"
 		export BPM_SRC="${BPM_PWD}/src"
-		bash "${BPM_SRC}/${run}"
+		bash "${BPM_SRC}/main.sh"
 		unset BPM_PWD BPM_LIB_DIR BPM_SRC
 		exit
+	;;
+	source)
+		cd $HOME/.local/state/bpm/"$2"/
+		source **/src/main.sh
+		exit
+	;;
 	*)
 		exit 1
 	;;
