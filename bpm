@@ -20,8 +20,9 @@ case "${1}" in
 			rm -f bpm.lock
 		fi
 		for i in "${dependencies[@]}"; do
+			name="$(cut -d@ -f1 <<< $i)"
 			echo "Adding: $i"
-			echo "$(cut -d@ -f1 <<< $i)@$(git ls-remote https://github.com/$(cut -d@ -f1 <<<$i).git | awk '{print $1;}' | head -n 1)" >> bpm.lock
+			echo "$name@$(git ls-remote https://github.com/$name.git | awk '{print $1;}' | head -n 1)" >> bpm.lock
 		done
 		exit
 	;;
@@ -37,17 +38,19 @@ case "${1}" in
 		for i in "${dependencies[@]}"; do
 			local_version="$(cut -d@ -f2 <<< $i)"
 			latest_tag="$(git ls-remote --tags https://github.com/$(cut -d@ -f1 <<< $i) | awk '{ print $2 }' | cut -d"/" -f3 | sort | tail -n 1)"
+			name="$(cut -d@ -f1 <<< $i)"
 			# check if major update is possible
 			case "${local_version:0:1}" in
 				^)
-					if ! semver diff "$local_version" "$latest_tag" | grep -q 'major'; then
-						upgrading+=("$(cut -d@ -f1 <<< $i)@$latest_tag")
-						echo "==> $(cut -d@ -f1 <<< $i)@$local_version -> $(cut -d@ -f1 <<< $i)@$latest_tag"
+					if ! semver diff "${local_version#?}" "$latest_tag" | grep -q 'major'; then
+						upgrading+=("$name@$latest_tag")
+						echo "==> $name@$local_version -> $name@$latest_tag"
 					else
-						checks+=("$(cut -d@ -f1 <<< $i)@$latest_tag")
+						checks+=("$name@$latest_tag")
+					fi
 				;;
 				*)
-					echo "Version locked: ${local_version#?}"
+					echo "Version locked: $local_version"
 				;;
 			esac
 		done
@@ -55,12 +58,16 @@ case "${1}" in
 			echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"
 			echo -e "\t${check[*]}\n"
 		fi
-		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}', followed by '${bold}bpm pull${normal}'"
-		echo -e "\ndependencies=("
-		for i in "${upgrading[@]}"; do
-			echo -e "\t'$i'"
-		done
-		echo ")"
+		if [[ "${#upgrading[@]}" -ne 0 ]]; then
+			echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}', followed by '${bold}bpm pull${normal}'"
+			echo -e "\ndependencies=("
+			for i in "${upgrading[@]}"; do
+				echo -e "\t'$i'"
+			done
+			echo ")"
+		else
+			echo "Nothing to be upgraded"
+		fi
 		exit
 	;;
 	pull)
@@ -69,14 +76,16 @@ case "${1}" in
 			exit 1
 		fi
 		for line in $(cat bpm.lock); do
-			mkdir -p $HOME/.local/state/bpm/$bpm_name/"$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
-			cd $HOME/.local/state/bpm/$bpm_name/"$(cut -d@ -f1 <<< $line | cut -d'/' -f1)"
-			if [[ -d "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)" ]]; then
+			name="$(cut -d@ -f1 <<< $line)"
+			echo "Pulling commit: $(cut -d@ -f2 <<< $line)"
+			mkdir -p $HOME/.local/state/bpm/$bpm_name/"$(cut -d'/' -f1 <<< $name)"
+			cd $HOME/.local/state/bpm/$bpm_name/"$(cut -d'/' -f1 <<< $name)"
+			if [[ -d "$(cut -d'/' -f2 <<< $name)" ]]; then
 				echo "Overwriting old directory"
-				rm -rf "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)"
+				rm -rf "$(cut -d'/' -f2 <<< $name)"
 			fi
-			git clone --filter=blob:none -j 20 -q https://github.com/"$(cut -d@ -f1 <<< $line)" $(cut -d@ -f1 <<< $line | cut -d'/' -f2)
-			cd "$(cut -d@ -f1 <<< $line | cut -d'/' -f2)"
+			git clone --filter=blob:none -j 20 -q https://github.com/"$name" $(cut -d'/' -f2 <<< $name)
+			cd "$(cut -d'/' -f2 <<< $name)"
 			git checkout -q "$(cut -d@ -f2 <<< $line)"
 			if test -f "bpm.sh"; then
 				echo "Running post-clone script"
