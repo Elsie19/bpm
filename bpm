@@ -51,7 +51,7 @@ case "${1}" in
 			echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"
 			echo -e "\t${check[*]}\n"
 		fi
-		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}', followed by '${bold}bpm pull${normal}"
+		echo -e "\nReplace your manifest with this and then run '${bold}bpm generate${normal}', followed by '${bold}bpm pull${normal}'"
 		echo -e "\ndependencies=("
 		for i in "${upgrading[@]}"; do
 			echo -e "\t'$i'"
