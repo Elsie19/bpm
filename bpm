@@ -95,7 +95,7 @@ case "${1}" in
 		exit
 	;;
 	compile)
-		if ! command -v bashc; then
+		if ! command -v bashc >/dev/null; then
 			echo -e "${bold}bashc${normal} not found!"
 		fi
 		if ! source ./manifest; then
