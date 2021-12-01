@@ -38,14 +38,17 @@ case "${1}" in
 			local_version="$(cut -d@ -f2 <<< $i)"
 			latest_tag="$(git ls-remote --tags https://github.com/$(cut -d@ -f1 <<< $i) | awk '{ print $2 }' | cut -d"/" -f3 | sort | tail -n 1)"
 			# check if major update is possible
-			if ! semver diff "$local_version" "$latest_tag" | grep -q 'major'; then
-				upgrading+=("$(cut -d@ -f1 <<< $i)@$latest_tag")
-				echo "==> $(cut -d@ -f1 <<< $i)@$local_version -> $(cut -d@ -f1 <<< $i)@$latest_tag"
-			else
-				upgrading+=("$(cut -d@ -f1 <<< $i)@$local_version")
-				check+=("$(cut -d@ -f1 <<< $i)@$local_version")
-				echo -e "${red}==> $(cut -d@ -f1 <<< $i)@$local_version != $(cut -d@ -f1 <<< $i)@$latest_tag${normal}"
-			fi
+			case "${local_version:0:1}" in
+				^)
+					if ! semver diff "$local_version" "$latest_tag" | grep -q 'major'; then
+						upgrading+=("$(cut -d@ -f1 <<< $i)@$latest_tag")
+						echo "==> $(cut -d@ -f1 <<< $i)@$local_version -> $(cut -d@ -f1 <<< $i)@$latest_tag"
+					fi
+				;;
+				*)
+					echo "No version constraint found"
+				;;
+			esac
 		done
 		if [[ "${#checks[@]}" -ne 0 ]]; then
 			echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"
