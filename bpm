@@ -40,19 +40,12 @@ case "${1}" in
 			latest_tag="$(git ls-remote --tags https://github.com/$(cut -d@ -f1 <<< $i) | awk '{ print $2 }' | cut -d"/" -f3 | sort | tail -n 1)"
 			name="$(cut -d@ -f1 <<< $i)"
 			# check if major update is possible
-			case "${local_version:0:1}" in
-				^)
-					if ! semver diff "${local_version#?}" "$latest_tag" | grep -q 'major'; then
-						upgrading+=("$name@$latest_tag")
-						echo "==> $name@$local_version -> $name@$latest_tag"
-					else
-						checks+=("$name@$latest_tag")
-					fi
-				;;
-				*)
-					echo "Version locked: $local_version"
-				;;
-			esac
+			if ! semver diff "$local_version" "$latest_tag" | grep -q 'major'; then
+				upgrading+=("$name@$latest_tag")
+				echo "==> $name@$local_version -> $name@$latest_tag"
+			else
+				checks+=("$name@$latest_tag")
+			fi
 		done
 		if [[ "${#checks[@]}" -ne 0 ]]; then
 			echo -e "\n${red}These packages will need to be manually checked for breaking behavior before upgrading${normal}"

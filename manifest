@@ -1,5 +1,5 @@
 bpm_name="bpm"
 
 dependencies=(
-	"Henryws/ask@^1.0.0"
+	"Henryws/ask@1.0.0"
 )
