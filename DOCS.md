@@ -20,3 +20,4 @@ dependencies=(
 )
 ```
 Run `bpm generate` to create the lock file, then `bpm pull` to download those dependencies, then your ready to start working! If you ever need to update your dependencies, run `bpm update`. By default, BPM will only upgrade on the minor version of SemVer (1.x.1), to ensure that no breaking changes are introduced. BPM will alert you to breaking changes, but will not modify the manifest.
+To create a binary of your project, run `bpm compile`, and to run your project, run `bpm run`.
