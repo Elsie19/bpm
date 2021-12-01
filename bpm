@@ -43,10 +43,11 @@ case "${1}" in
 					if ! semver diff "$local_version" "$latest_tag" | grep -q 'major'; then
 						upgrading+=("$(cut -d@ -f1 <<< $i)@$latest_tag")
 						echo "==> $(cut -d@ -f1 <<< $i)@$local_version -> $(cut -d@ -f1 <<< $i)@$latest_tag"
-					fi
+					else
+						checks+=("$(cut -d@ -f1 <<< $i)@$latest_tag")
 				;;
 				*)
-					echo "No version constraint found"
+					echo "Version locked: ${local_version#?}"
 				;;
 			esac
 		done
