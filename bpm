@@ -105,8 +105,8 @@ case "${1}" in
 			echo -e "${red}Failed to read manifest${normal}"
 			exit 1
 		fi
-		mkdir -pv build/binary
-		echo '#!/bin/bash' > build/"$bpm_name"
+		mkdir -p build/binary
+		echo '#!/usr/bin/env bash' > build/"$bpm_name"
 		for line in $(cat bpm.lock); do
 			if [[ ${#dependencies[@]} -ne 0 ]]; then
 				for i in "${dependencies[@]}"; do
@@ -122,6 +122,7 @@ case "${1}" in
 		fi
 		cat src/main.sh >> build/"$bpm_name"
 		/usr/bin/bashc build/"$bpm_name" build/binary/"$bpm_name"
+		echo "Binary located at ${bold}$PWD/build/binary/$bpm_name${normal}"
 	;;
 	new)
 		mkdir -p "$2"
