@@ -81,12 +81,13 @@ case "${1}" in
 		done
 	;;
 	run)
+		shift
 		if ! source ./manifest; then
 			echo -e "${red}Failed to read manifest${normal}"
 			exit 1
 		fi
 		bpm compile
-		"$PWD"/build/binary/"$bpm_name"
+		"$PWD"/build/binary/"$bpm_name" $@
 		exit
 	;;
 	source)
