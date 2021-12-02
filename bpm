@@ -104,6 +104,7 @@ case "${1}" in
 	compile)
 		if ! command -v bashc >/dev/null; then
 			echo -e "${bold}bashc${normal} not found!"
+			exit 127
 		fi
 		if ! source ./manifest; then
 			echo -e "${red}Failed to read manifest${normal}"
