@@ -135,6 +135,12 @@ case "${1}" in
 		mkdir -p src
 		echo '# Replace contents. Do not include shebang' > src/main.sh
 		chmod +x src/main.sh
+		tee <<-EOF manifest >/dev/null
+		bpm_name="$2"
+       		dependencies=(
+		# put dependencies in here like this: 'Henryws/fancy_message@1.0.0'
+		)
+		EOF
 		exit
 	;;
 	*)
